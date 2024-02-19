@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import socket from "./socket";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -19,6 +19,8 @@ function Auction() {
   const [teamdetails, setTeamdetails] = useState("");
   const [listPlayers, setListplayers] = useState("");
   const [allteam, setAllteam] = useState("");
+  const [end, setEnd] = useState(false);
+  const navigate = useNavigate();
 
   let team = "auctioner";
   // let load = false;
@@ -112,6 +114,13 @@ function Auction() {
     }
   }, [stat]);
 
+  useEffect(() => {
+    socket.on("end_auction", () => {
+      // setEnd(true);
+      console.log("Receiving the socket end event");
+      navigate(`/endauction?roomId=${roomid}`);
+    });
+  }, [end]);
   useEffect(() => {
     // Add event listener when the component mounts
     if (user !== "auctioner") {
@@ -296,6 +305,12 @@ function Auction() {
     handleUnsoldPlayer();
   };
 
+  const handleEnd = () => {
+    setEnd(true);
+    socket.emit("end", roomid);
+    console.log("Emit socket end event");
+    // navigate(`/end_auction/${roomid}`, { replace: true });
+  };
   return (
     <div>
       <div className="flex w-full">
@@ -370,9 +385,20 @@ function Auction() {
             <div className=" font-semibold text-gray-800 text-2xl ml-80">
               CURRENT PLAYER
             </div>
-            <div className="timer flex bg-purple-600 text-white rounded-lg text-2xl font-lightweight w-28 p-3 ml-6 mt-5">
-              <div>TIMER:</div>
-              <div>{timer}</div>
+            <div className="flex justify-between">
+              <div className="timer flex bg-purple-600 text-white rounded-lg text-2xl font-lightweight w-28 p-3 ml-6 mt-5">
+                <div>TIMER:</div>
+                <div>{timer}</div>
+              </div>
+              {user === "auctioner" && (
+                <button
+                  onClick={handleEnd}
+                  // to={`end_auction/${roomid}`}
+                  className=" bg-red-500 text-white rounded-lg text-2xl font-lightweight w-48 p-3 pl-4 mt-5 mr-6 "
+                >
+                  END AUCTION
+                </button>
+              )}
             </div>
             <div className="main content flex flex-col mt-5">
               <div className="ml-60">

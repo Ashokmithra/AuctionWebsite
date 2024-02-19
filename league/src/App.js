@@ -6,6 +6,7 @@ import CreateTeam from "./components/CreateTeam";
 import Auction from "./components/Auction";
 import CreateRoom from "./components/CreateRoom";
 // import Bidder from "./components/Bidder";
+import EndAuction from "./components/EndAuction";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
         <Route path="/createteam" element={<CreateTeam />} />
         <Route path="/auction" element={<Auction />} />
         <Route path="/create_room" element={<CreateRoom />} />
+        <Route path="/endauction" element={<EndAuction />} />
+
         {/* <Route path="/bidder_auction" element={<Bidder />} /> */}
       </Routes>
     </div>

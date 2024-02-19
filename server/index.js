@@ -255,6 +255,9 @@ io.on("connection", (socket) => {
     // console.log(rooms);
     io.to(id).emit("team_creation", message);
   });
+  socket.on("end", (roomid) => {
+    io.to(roomid).emit("end_auction");
+  });
 });
 
 server.listen(3001, () => {
