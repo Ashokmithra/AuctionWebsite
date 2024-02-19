@@ -21,7 +21,7 @@ function Auction() {
   const [allteam, setAllteam] = useState("");
 
   let team = "auctioner";
-  let load = false;
+  // let load = false;
   let socketId = socket.id;
   if (user === "bidder") {
     team = searchParams.get("team");
@@ -185,7 +185,9 @@ function Auction() {
   useEffect(() => {
     socket.on("p_update", (p, t) => {
       // console.log(p + " " + t);
-      setPrize(p);
+      let temp1 = parseFloat(p);
+      temp1 /= 100;
+      setPrize(temp1.toFixed(2));
       setCurrentTeam(t);
       if (t != "auctioner") {
         team = t;
@@ -207,7 +209,7 @@ function Auction() {
     socket.on("timer_update", () => {
       setTimer(5);
       setTimerRunning(true);
-       setSold_unsold_indicator(false);
+      setSold_unsold_indicator(false);
     });
     socket.on("stop", () => {
       setTimerRunning(false);
@@ -218,12 +220,12 @@ function Auction() {
   const makeBid = () => {
     // console.log("MAKE BID->" + team);
     // console.log("Old prize=>" + prize + " type of" + typeof prize);
-
-    let old_prize = parseInt(prize) + 20;
+    let bid = parseFloat(prize) * 100;
+    let old_prize = bid + 20;
     // console.log("prize +20==>", old_prize);
     // console.log("new_prize " + old_prize);
 
-    setPrize(old_prize);
+    setPrize((parseFloat(old_prize) / 100).toFixed(2));
     setCurrentTeam(team);
     // console.log("Player=>" + player, prize);
     socket.emit("prize_update", {
@@ -297,7 +299,7 @@ function Auction() {
   return (
     <div>
       <div className="flex w-full">
-        <div className="list_players w-96 mt-10 ">
+        <div className="list_players w-100 mt-10 ">
           <div className="ml-20 font-semibold text-gray-800 text-2xl ">
             {user === "auctioner" && <span>LIST OF PLAYERS</span>}
             {user === "bidder" && <span>BOUGHT PLAYERS</span>}
@@ -323,7 +325,9 @@ function Auction() {
                     // <div className="mt-1 ml-7 ">
                     <tr>
                       <td>{t["First_Name"] + " " + t["Surname"]}</td>
-                      <td>{t["Base_Price_Lakhs"]}</td>
+                      <td>
+                        {(parseFloat(t["Base_Price_Lakhs"]) / 100).toFixed(2)}Cr
+                      </td>
                       <div className="ml-4">
                         <td>{t["Country"]}</td>
                       </div>
@@ -337,7 +341,7 @@ function Auction() {
                   return (
                     <tr>
                       <td>{p["name"]}</td>
-                      <td>{p["price"]}</td>
+                      <td>{p["price"]}Cr</td>
                       <div className="ml-4">
                         <td>{p["specialism"]}</td>
                       </div>
@@ -393,14 +397,23 @@ function Auction() {
                       Base Price:
                     </div>
                     <div className="text-gray-800  mt-3 inline">
-                      {player ? player["Base_Price_Lakhs"] : "-"}
+                      {player ? (
+                        <span>
+                          {(
+                            parseFloat(player["Base_Price_Lakhs"]) / 100
+                          ).toFixed(2)}
+                          Cr
+                        </span>
+                      ) : (
+                        "-"
+                      )}
                     </div>
                   </div>
                   <div>
                     <div className="text-gray-800 font-semibold mt-3 inline ml-16">
                       Current Bid:
                     </div>
-                    <div className="text-gray-800  mt-3 inline">{prize}</div>
+                    <div className="text-gray-800  mt-3 inline">{prize}Cr</div>
                   </div>
                 </div>
                 <div className="currentteam mt-3">
@@ -534,7 +547,16 @@ function Auction() {
                         </div>
                       </td>
                       <td>
-                        {teamdetails ? teamdetails["avaliable_amount"] : "-"}
+                        {teamdetails
+                          ? (() => {
+                              let temp = (
+                                parseFloat(teamdetails["avaliable_amount"]) /
+                                100
+                              ).toFixed(2);
+                              return temp;
+                            })()
+                          : "-"}
+                        Cr
                       </td>
                     </tr>
                     <tr>
@@ -589,7 +611,13 @@ function Auction() {
                             </td>
                             <td>
                               <div className="  ml-8 mt-1">
-                                {t["avaliable_amount"]}
+                                {(() => {
+                                  let temp = (
+                                    parseFloat(t["avaliable_amount"]) / 100
+                                  ).toFixed(2);
+                                  return temp;
+                                })()}
+                                Cr
                               </div>
                             </td>
                           </tr>
