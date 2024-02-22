@@ -213,6 +213,11 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("all_team_list", (id) => {
+    let room = rooms.find((room) => room.roomId === id);
+    socket.emit("all_team_list_ack", room);
+  });
+
   socket.on("team_send", (data) => {
     let team = data.teamName;
     let socketId = data.socketId;

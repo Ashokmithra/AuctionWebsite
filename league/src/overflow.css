@@ -1,0 +1,18 @@
+::-webkit-scrollbar {
+  width: 3px; /* Adjust scrollbar height */
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light gray */
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #9333ea; /* Dark gray */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker gray */
+}

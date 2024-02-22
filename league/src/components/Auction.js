@@ -5,6 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import userimage from "../images/user.jpg";
 import flightImage from "../images/flight.png";
+import "../overflow.css";
 
 function Auction() {
   const [searchParams] = useSearchParams();
@@ -21,6 +22,7 @@ function Auction() {
   const [allteam, setAllteam] = useState("");
   const [end, setEnd] = useState(false);
   const navigate = useNavigate();
+  const [scroll, setScroll] = useState(false);
 
   let team = "auctioner";
   // let load = false;
@@ -32,6 +34,10 @@ function Auction() {
   const [prize, setPrize] = useState(0);
 
   const handleStart = () => {
+    if (scroll) {
+      document.getElementById("target-element").scrollTop += 64;
+    }
+    setScroll(true);
     setSold_unsold_indicator(false);
     socket.emit("req_player", { id: roomid });
     // console.log(teamdetails);
@@ -118,7 +124,11 @@ function Auction() {
     socket.on("end_auction", () => {
       // setEnd(true);
       console.log("Receiving the socket end event");
-      navigate(`/endauction?roomId=${roomid}`);
+      console.log("Team--->" + team);
+      console.log();
+      let tom = teamdetails.teamName;
+      if (user === "auctioner") tom = "auctioner";
+      navigate(`/endauction?roomId=${roomid}&team=${tom}`);
     });
   }, [end]);
   useEffect(() => {
@@ -194,9 +204,9 @@ function Auction() {
   useEffect(() => {
     socket.on("p_update", (p, t) => {
       // console.log(p + " " + t);
-      let temp1 = parseFloat(p);
-      temp1 /= 100;
-      setPrize(temp1.toFixed(2));
+      let temp1 = p / 100;
+
+      setPrize(parseFloat(temp1).toFixed(2));
       setCurrentTeam(t);
       if (t != "auctioner") {
         team = t;
@@ -268,7 +278,7 @@ function Auction() {
     const handleSoldPlayer = () => {
       socket.emit("sold_player", {
         status: "sold",
-        player_prize: prize,
+        player_prize: prize * 100,
         player_team: currentTeam,
         player_details: player,
         id: roomid,
@@ -315,68 +325,85 @@ function Auction() {
     <div>
       <div className="flex w-full">
         <div className="list_players w-100 mt-10 ">
-          <div className="ml-20 font-semibold text-gray-800 text-2xl ">
+          <div className="ml-20 font-semibold text-gray-800 text-2xl mt-3 ">
             {user === "auctioner" && <span>LIST OF PLAYERS</span>}
             {user === "bidder" && <span>BOUGHT PLAYERS</span>}
           </div>
+          <div className="bg-gray-50  shadow-md flex rounded-lg h-12 mt-8 w-96 ml-5">
+            <div className="color w-1  "></div>
+            <div className="Name w-36 mt-3 ml-1">NAME</div>
+            <div className="price w-14 mt-3">PRICE</div>
+            {user === "auctioner" ? (
+              <div className="country w-36 mt-3">COUNTRY</div>
+            ) : (
+              <div className="country w-36 mt-3">SPECIALISM</div>
+            )}
 
-          <div className="mt-5 ml-4 bg-gray-100 p-2 rounded-lg  overflow-y-auto max-h-100 ">
-            <table>
-              <tr>
-                <td>
-                  <div className=" text-gray-800 font-medium"> NAME</div>
-                </td>
-                <td>
-                  <div className=" text-gray-800 font-medium"> PRICE</div>
-                </td>
-                <td>
-                  <div className=" text-gray-800 font-medium ml-4">COUNTRY</div>
-                </td>
-              </tr>
+            <div className="foreign_symbol w-6 mt-4"></div>
+          </div>
+          <div>
+            <div
+              id="target-element"
+              className="mt-2 ml-4  p-2 rounded-lg  overflow-y-auto max-h-100 "
+            >
               {user === "auctioner" &&
                 listPlayers &&
                 listPlayers.map((t) => {
                   return (
                     // <div className="mt-1 ml-7 ">
-                    <tr>
-                      <td>{t["First_Name"] + " " + t["Surname"]}</td>
-                      <td>
-                        {(parseFloat(t["Base_Price_Lakhs"]) / 100).toFixed(2)}Cr
-                      </td>
-                      <div className="ml-4">
-                        <td>{t["Country"]}</td>
+                    // <div>
+                    <div className="bg-gray-50  shadow-md flex rounded-lg h-12 mt-4">
+                      <div
+                        className={
+                          t["List_Sr_No"] === player["List_Sr_No"]
+                            ? "w-1 bg-purple-600 h-full rounded-lg"
+                            : ""
+                        }
+                      ></div>
+
+                      <div className="w-36 mt-3 ml-1">
+                        {t["First_Name"] + " " + t["Surname"]}
                       </div>
-                    </tr>
-                    // </div>
+                      <div className="w-14 mt-3">
+                        {parseFloat(t["Base_Price_Lakhs"] / 100).toFixed(2)}
+                        Cr
+                      </div>
+                      <div className="w-36 mt-3">{t["Country"]}</div>
+                    </div>
                   );
                 })}
               {user === "bidder" &&
                 teamdetails &&
                 teamdetails.players.map((p) => {
                   return (
-                    <tr>
-                      <td>{p["name"]}</td>
-                      <td>{p["price"]}Cr</td>
-                      <div className="ml-4">
-                        <td>{p["specialism"]}</td>
+                    <div className="bg-gray-50  shadow-md flex rounded-lg h-12 mt-4 w-90">
+                      <div
+                        className={
+                          p["country"] !== "India"
+                            ? "w-1 bg-red-500 h-full rounded-lg"
+                            : "w-1 bg-blue-500 h-full rounded-lg"
+                        }
+                      ></div>
+                      <div className="w-36 mt-3 ml-1">{p["name"]}</div>
+                      <div className="w-14 mt-3">
+                        {parseFloat(p["price"] / 100).toFixed(2)}Cr
                       </div>
-                      <td>
-                        <div className="ml-4">
-                          {p["country"] !== "India" ? (
-                            <img
-                              className="h-5 w-5"
-                              src={flightImage}
-                              alt="foreign player"
-                            />
-                          ) : (
-                            ""
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                      <div className="w-28 mt-3">{p["specialism"]}</div>
+                      <div className="w-6 mt-4">
+                        {p["country"] !== "India" ? (
+                          <img
+                            className="h-5 w-5"
+                            src={flightImage}
+                            alt="foreign player"
+                          />
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                    </div>
                   );
                 })}
-            </table>
+            </div>
           </div>
         </div>
 
@@ -425,9 +452,9 @@ function Auction() {
                     <div className="text-gray-800  mt-3 inline">
                       {player ? (
                         <span>
-                          {(
-                            parseFloat(player["Base_Price_Lakhs"]) / 100
-                          ).toFixed(2)}
+                          {parseFloat(player["Base_Price_Lakhs"] / 100).toFixed(
+                            2
+                          )}
                           Cr
                         </span>
                       ) : (
@@ -510,11 +537,11 @@ function Auction() {
         </div>
         <div className="right-content w-96 mr-4">
           <div>
-            <div className="ml-20 font-semibold text-gray-800 text-2xl mt-10">
+            <div className="ml-20 font-semibold text-gray-800 text-2xl mt-10 ">
               {user === "auctioner" && <span>PLAYER DETAILS</span>}
               {user === "bidder" && <span>{team} DETAILS</span>}
             </div>
-            <div className="player_details bg-gray-100 p-2 rounded-lg mt-5">
+            <div className="player_details bg-gray-50  shadow-lg p-2 rounded-lg mt-5">
               <table>
                 {user === "auctioner" && (
                   <React.Fragment>
@@ -575,9 +602,8 @@ function Auction() {
                       <td>
                         {teamdetails
                           ? (() => {
-                              let temp = (
-                                parseFloat(teamdetails["avaliable_amount"]) /
-                                100
+                              let temp = parseFloat(
+                                teamdetails["avaliable_amount"] / 100
                               ).toFixed(2);
                               return temp;
                             })()
@@ -614,7 +640,7 @@ function Auction() {
                 <div className="ml-20 font-semibold text-gray-800 text-2xl mt-10">
                   LIST OF TEAMS
                 </div>
-                <div className="list_team bg-gray-100 p-2 rounded-lg mt-5 overflow-y-auto max-h-96 ">
+                <div className="list_team bg-gray-50  shadow-lg p-2 rounded-lg mt-5 overflow-y-auto max-h-96 target-element ">
                   <table>
                     <tr>
                       <td>
@@ -638,8 +664,8 @@ function Auction() {
                             <td>
                               <div className="  ml-8 mt-1">
                                 {(() => {
-                                  let temp = (
-                                    parseFloat(t["avaliable_amount"]) / 100
+                                  let temp = parseFloat(
+                                    t["avaliable_amount"] / 100
                                   ).toFixed(2);
                                   return temp;
                                 })()}
