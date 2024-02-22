@@ -1,4 +1,3 @@
-![Screenshot (1004)](https://github.com/Ashokmithra/AuctionWebsite/assets/83507140/fb42b904-5e18-4f0f-b638-248bd3606f1f)# AuctionWebsite
 It is an auction website 
 React.js is used as an frontend
 Node.js is used as an backend
