@@ -116,7 +116,8 @@ function EndAuction() {
           <div className="player_details w-full ">
             <div className="text-2xl font-normal pl-8 pt-8">PLAYERS LIST</div>
             <div className="overflow-y-auto ml-8 max-h-80 ">
-              {players !== "" &&
+              {players &&
+                players !== "" &&
                 players.map((p) => {
                   return (
                     <div className="bg-gray-50  shadow-md flex rounded-lg h-12 mt-4 w-90">

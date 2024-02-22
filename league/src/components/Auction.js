@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import socket from "./socket";
 import { ToastContainer, toast } from "react-toastify";
@@ -23,13 +23,30 @@ function Auction() {
   const [end, setEnd] = useState(false);
   const navigate = useNavigate();
   const [scroll, setScroll] = useState(false);
+  const [t_team, setT_team] = useState();
 
   let team = "auctioner";
   // let load = false;
   let socketId = socket.id;
   if (user === "bidder") {
     team = searchParams.get("team");
+    // setT_team(team);
   }
+  const hasLoaded = useRef(false);
+
+  useEffect(() => {
+    if (!hasLoaded.current) {
+      if (user === "bidder") {
+        team = searchParams.get("team");
+        console.log("Current team useRef" + team);
+        setT_team(team);
+      }
+
+      // Mark that the component has loaded
+      hasLoaded.current = true;
+    }
+  }, []);
+
   const [player, setPlayer] = useState("");
   const [prize, setPrize] = useState(0);
 
@@ -40,7 +57,6 @@ function Auction() {
     setScroll(true);
     setSold_unsold_indicator(false);
     socket.emit("req_player", { id: roomid });
-    // console.log(teamdetails);
     // console.log(user);
     setTimer(5);
     setTimerRunning(true);
@@ -122,15 +138,14 @@ function Auction() {
 
   useEffect(() => {
     socket.on("end_auction", () => {
-      // setEnd(true);
       console.log("Receiving the socket end event");
-      console.log("Team--->" + team);
-      console.log();
-      let tom = teamdetails.teamName;
+      console.log("T__Team--->" + t_team);
+      let tom = t_team;
       if (user === "auctioner") tom = "auctioner";
+
       navigate(`/endauction?roomId=${roomid}&team=${tom}`);
     });
-  }, [end]);
+  }, [end, t_team]);
   useEffect(() => {
     // Add event listener when the component mounts
     if (user !== "auctioner") {
